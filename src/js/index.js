@@ -1,12 +1,9 @@
-import * as THREE from "three";
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from "dat.gui";
 
 import fragment from "./shaders/fragment.glsl";
 import vertex from "./shaders/vertex.glsl";
-
-// import { TimelineMax } from "gsap";
-
-const OrbitControls = require("three-orbit-controls")(THREE);
 
 export default class Sketch {
   constructor(options) {
@@ -16,9 +13,9 @@ export default class Sketch {
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
     this.renderer = new THREE.WebGLRenderer();
-
+    
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.width / 2, this.height / 2);
+    this.renderer.setSize(this.width, this.height);
     this.renderer.setClearColor(0xeeeeee, 1);
     this.renderer.physicallyCorrectLights = true;
     this.renderer.outputEncoding = THREE.sRGBEncoding;
@@ -33,17 +30,17 @@ export default class Sketch {
     );
 
     this.camera.position.set(0, 0, 2);
-    this.controls = new OrbitControls(this.camera, this.renderer.dom);
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.time = 0;
 
     this.isPlaying = true;
-    this.init.bind(this);
+    this.init();
   }
 
   init() {
     this.addObjects();
     this.resize();
-    this.renderer();
+    this.render();
     this.setupResize();
   }
 
@@ -57,15 +54,17 @@ export default class Sketch {
   }
 
   setupResize() {
-    window.addEventListener("resize", this.setupResize.bind(this));
+    window.addEventListener("resize", this.resize.bind(this));
   }
 
   resize() {
     this.width = this.container.offsetWidth;
     this.height = this.container.offsetHeight;
+
     this.renderer.setSize(this.width, this.height);
     this.camera.aspect = this.width / this.height;
-    this.camera.updateProjectionMatrix(); // Figure out what this does
+    
+    this.camera.updateProjectionMatrix(); // Figure out what this does—It get's the people going
   }
 
   addObjects() {
@@ -98,21 +97,22 @@ export default class Sketch {
 
   play() {
     if (!this.playing) {
-      this.renderer();
+      this.render();
       this.isPlaying = true;
     }
   }
 
-  renderer() {
+  render() {
     if (!this.isPlaying) return;
 
     this.time += 0.05;
     this.material.uniforms.time.value = this.time;
-    requestAnimationFrame(this.renderer.bind(this));
+    requestAnimationFrame(this.render.bind(this));
     this.renderer.render(this.scene, this.camera);
   }
 }
 
-new Sketch({
+
+const game = new Sketch({
   dom: document.getElementById("app")
 });
